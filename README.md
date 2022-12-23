@@ -76,9 +76,110 @@ or
 
 docker-compose up -d redis
 ```
+接著檢查密碼是否安裝完成與密碼是否設定成功
+
+進入 redis 容器，或是開啟終端機
+
+輸入 
+
+```
+redis-cli
+
+or
+
+redis-cli -p 6379
+```
+能成功進入後用auth + 密碼開通
+
+```
+auth 輸入你的密碼
+
+```
+如果回應是 OK 一切準備就緒
+
+參考連結:https://nicokie0420.medium.com/laradock-%E5%AF%A6%E8%A3%9D-redis-%E6%9C%8D%E5%8B%99%E6%95%99%E5%AD%B8%E6%96%87%E4%BB%B6-5cd4ef0268f5https://nicokie0420.medium.com/laradock-%E5%AF%A6%E8%A3%9D-redis-%E6%9C%8D%E5%8B%99%E6%95%99%E5%AD%B8%E6%96%87%E4%BB%B6-5cd4ef0268f5)
+
+### Step.2 laravel redis 設定
+
+在laravel中有phpredis與predis兩種可以選擇，  
+phpredis是用C寫的PHP擴充套件，predis是用PHP寫的，   
+以效能來說當然是phpredis比較好，    
+不過其實兩者速度上沒有差很多，還是要依專案需求來選擇。     
+對於使用Laravel來講，可以直接用composer來安裝predis，   
+
+```
+composer require predis/predis
+```
+設定 config/database.php  
+
+```
+...
+'redis' => [
+
+        'client' => env('REDIS_CLIENT', 'phpredis'),
+
+        'options' => [
+            'cluster' => env('REDIS_CLUSTER', 'redis'),
+            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
+        ],
+
+        'default' => [
+            // 'url' => env('REDIS_URL'),  
+            'host' => env('REDIS_HOST', '127.0.0.1'),
+            'username' => env('REDIS_USERNAME'),
+            'password' => env('REDIS_PASSWORD'),
+            'port' => env('REDIS_PORT', '6379'),
+            'database' => env('REDIS_DB', '0'),
+        ],
+
+        'cache' => [
+            // 'url' => env('REDIS_URL'),
+            'host' => env('REDIS_HOST', '127.0.0.1'),
+            'username' => env('REDIS_USERNAME'),
+            'password' => env('REDIS_PASSWORD'),
+            'port' => env('REDIS_PORT', '6379'),
+            'database' => env('REDIS_CACHE_DB', '1'),
+        ],
+
+],
+...
+```
+說明:   
+● default/cache中的url都註解掉，這是用一行url的方式設定才需要。  
+● 在程式中use Illuminate\Support\Facades\Redis;，會使用預設(default)的資料庫0。  
 
 
-(參考連結:https://nicokie0420.medium.com/laradock-%E5%AF%A6%E8%A3%9D-redis-%E6%9C%8D%E5%8B%99%E6%95%99%E5%AD%B8%E6%96%87%E4%BB%B6-5cd4ef0268f5https://nicokie0420.medium.com/laradock-%E5%AF%A6%E8%A3%9D-redis-%E6%9C%8D%E5%8B%99%E6%95%99%E5%AD%B8%E6%96%87%E4%BB%B6-5cd4ef0268f5)
+設定 .env 
 
+```
+...
+CACHE_DRIVER=redis
+SESSION_DRIVER=redis
+REDIS_HOST=redis
+REDIS_PASSWORD=123456
+REDIS_PORT=6379
+REDIS_CLIENT=predis
+...
+```
+說明:   
+● Laravel預設使用檔案(file)儲存快取(cache)，若要改用redis，
+  記得把env file中的CACHE_DRIVER從原本的file改為redis， 
+  session也是同理(SESSION_DRIVER=file)。  
+   
+● 因為我們使用laradock所以 REDIS_HOST 要從原本的127.0.0.1 改成 redis
+● REDIS_CLIENT predis 是新加上去的
+
+這邊完成後進頁面沒跳出錯誤，基本就可以使用了
+
+### Step.3 使用方法
+
+```
+use Illuminate\Support\Facades\Redis;
+Redis::set('name', 'Vic');
+Redis::get('name');
+```
+
+剩下更完整的說明可參考連結
+參考連結: https://vocus.cc/article/625ba2bdfd89780001a72207
 
 
