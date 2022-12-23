@@ -166,7 +166,7 @@ REDIS_CLIENT=predis
   記得把env file中的CACHE_DRIVER從原本的file改為redis， 
   session也是同理(SESSION_DRIVER=file)。  
    
-● 因為我們使用laradock所以 REDIS_HOST 要從原本的127.0.0.1 改成 redis
+● 因為我們使用laradock所以 REDIS_HOST 要從原本的127.0.0.1 改成 redis   
 ● REDIS_CLIENT predis 是新加上去的
 
 這邊完成後進頁面沒跳出錯誤，基本就可以使用了
